@@ -18,9 +18,13 @@ Route::prefix('v1')->group(function () {
     Route::get('/products/{product}/variants', [ProductVariantController::class, 'index']);
     
     // Categories
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::get('/categories/{category}', [CategoryController::class, 'show']);
-    Route::get('/categories/{category}/products', [CategoryController::class, 'products']);
+    Route::get('/categories', [CategoryController::class, 'index']); // Дерево категорий
+    Route::get('/categories/roots', [CategoryController::class, 'roots']); // Корневые категории
+    Route::get('/categories/search', [CategoryController::class, 'search']); // Поиск категорий
+    Route::get('/categories/{slug}', [CategoryController::class, 'show']); // Категория по slug
+    Route::get('/categories/{slug}/children', [CategoryController::class, 'children']); // Дочерние категории
+    Route::get('/categories/{slug}/breadcrumbs', [CategoryController::class, 'breadcrumbs']); // Хлебные крошки
+    Route::get('/categories/{slug}/products', [CategoryController::class, 'products']); // Товары категории
     
     // Search
     Route::get('/search', [ProductController::class, 'search']);

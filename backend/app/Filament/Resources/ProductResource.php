@@ -35,12 +35,32 @@ class ProductResource extends Resource
                     ->disabled()
                     ->dehydrated(false)
                     ->label('Слаг (генерируется автоматически)'),
-                Forms\Components\RichEditor::make('description'),
+                Forms\Components\TextInput::make('sku')
+                    ->label('Sku'),
                 Forms\Components\Select::make('categories')
-                    ->relationship('categories', 'name') // связь belongsToMany, отображаем поле name
+                    ->relationship('categories', 'name')
                     ->label('Категории')
-                    ->multiple(),
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->options(function () {
+                        return \App\Models\Category::orderBy('_lft')->get()->pluck('indented_name', 'id');
+                    }),
+            
+                Forms\Components\TextInput::make('price')
+                    ->label('Цена'),
+                Forms\Components\TextInput::make('old_price')
+                    ->label(' Старая цена'),
+                Forms\Components\RichEditor::make('description')->columnSpanFull(),
+            
                 SpatieMediaLibraryFileUpload::make('images')->collection('images')->multiple(),
+                Forms\Components\Toggle::make('active')
+                    ->label('Активен')
+                    ->default(true),
+                Forms\Components\TextInput::make('meta.title')
+                    ->label('Мета Title'),
+                Forms\Components\TextInput::make('meta.description')
+                    ->label('Мета Description'),
             ]);
     }
 

@@ -20,17 +20,31 @@ class CategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'description' => $this->description,
-            'image' => $this->image,
-            'is_active' => $this->is_active,
-            'sort_order' => $this->sort_order,
-            'meta_title' => $this->meta_title,
-            'meta_description' => $this->meta_description,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'parent' => new CategoryResource($this->whenLoaded('parent')),
-            'children' => CategoryResource::collection($this->whenLoaded('children')),
-            'products_count' => $this->when(isset($this->products_count), $this->products_count),
+            'full_name' => $this->full_name,
+            'parent_id' => $this->parent_id,
+            'level' => $this->depth ?? 0,
+            'has_children' => $this->children()->exists(),
+            'products_count' => $this->products()->count(),
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
+            
+            // Включаем родителя только при необходимости
+            'parent' => $this->when(
+                $this->relationLoaded('parent') && $this->parent,
+                fn() => new CategoryResource($this->parent)
+            ),
+            
+            // Включаем детей только при необходимости
+            'children' => $this->when(
+                $this->relationLoaded('children') || isset($this->children),
+                fn() => CategoryResource::collection($this->children ?? collect())
+            ),
+            
+            // Дополнительные поля для админки
+            'path' => $this->when(
+                $request->routeIs('admin.*'),
+                fn() => $this->ancestors()->pluck('name')->push($this->name)->implode(' > ')
+            ),
         ];
     }
 }
