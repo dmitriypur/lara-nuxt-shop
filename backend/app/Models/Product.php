@@ -86,4 +86,12 @@ class Product extends Model implements HasMedia
             'price_max'   => $this->price_max,
         ];
     }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

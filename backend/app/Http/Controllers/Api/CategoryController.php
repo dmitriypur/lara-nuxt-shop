@@ -20,7 +20,7 @@ class CategoryController extends Controller
      */
     public function index(): JsonResponse
     {
-        $categories = Category::defaultOrder()->get()->toTree();
+        $categories = Category::with('children')->whereIsRoot()->defaultOrder()->get();
         
         return response()->json([
             'data' => CategoryResource::collection($categories),
@@ -82,8 +82,10 @@ class CategoryController extends Controller
         // Получаем ID категории и всех её потомков
         $categoryIds = $category->descendants()->pluck('id')->push($category->id);
         
-        $query = Product::with(['category'])
-            ->whereIn('category_id', $categoryIds);
+        $query = Product::with(['categories'])
+            ->whereHas('categories', function ($q) use ($categoryIds) {
+                $q->whereIn('categories.id', $categoryIds);
+            });
 
         // Фильтр по цене
         if ($request->has('min_price')) {

@@ -23,8 +23,8 @@ class CategoryResource extends JsonResource
             'full_name' => $this->full_name,
             'parent_id' => $this->parent_id,
             'level' => $this->depth ?? 0,
-            'has_children' => $this->children()->exists(),
-            'products_count' => $this->products()->count(),
+            'has_children' => $this->relationLoaded('children') ? $this->children->isNotEmpty() : ($this->rgt - $this->lft > 1),
+            'products_count' => $this->relationLoaded('products') ? $this->products->count() : 0,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             
@@ -42,8 +42,8 @@ class CategoryResource extends JsonResource
             
             // Дополнительные поля для админки
             'path' => $this->when(
-                $request->routeIs('admin.*'),
-                fn() => $this->ancestors()->pluck('name')->push($this->name)->implode(' > ')
+                $request->routeIs('admin.*') && $this->relationLoaded('ancestors'),
+                fn() => $this->ancestors->pluck('name')->push($this->name)->implode(' > ')
             ),
         ];
     }
