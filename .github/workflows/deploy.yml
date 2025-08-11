@@ -1,0 +1,146 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, dom, fileinfo, mysql, redis
+        coverage: xdebug
+    
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: backend/vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+    
+    - name: Install dependencies
+      working-directory: ./backend
+      run: composer install --prefer-dist --no-progress
+    
+    - name: Copy .env
+      working-directory: ./backend
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    
+    - name: Generate key
+      working-directory: ./backend
+      run: php artisan key:generate
+    
+    - name: Directory Permissions
+      working-directory: ./backend
+      run: chmod -R 777 storage bootstrap/cache
+    
+    - name: Create Database
+      working-directory: ./backend
+      run: |
+        mkdir -p database
+        touch database/database.sqlite
+    
+    - name: Execute tests (Unit and Feature tests) via PHPUnit
+      working-directory: ./backend
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+        CACHE_DRIVER: array
+        SESSION_DRIVER: array
+        QUEUE_DRIVER: sync
+      run: vendor/bin/phpunit
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd ${{ secrets.PROJECT_PATH }}
+          git pull origin main
+          cd backend
+          composer install --optimize-autoloader --no-dev
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan queue:restart
+          sudo systemctl reload nginx
+          sudo systemctl reload php8.2-fpm
+
+  deploy-docker:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy with Docker
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd ${{ secrets.PROJECT_PATH }}
+          git pull origin main
+          docker-compose -f docker-compose.prod.yml down
+          docker-compose -f docker-compose.prod.yml build --no-cache
+          docker-compose -f docker-compose.prod.yml up -d
+          docker-compose -f docker-compose.prod.yml exec -T app php artisan migrate --force
+          docker-compose -f docker-compose.prod.yml exec -T app php artisan config:cache
+          docker-compose -f docker-compose.prod.yml exec -T app php artisan route:cache
+          docker-compose -f docker-compose.prod.yml exec -T app php artisan view:cache
+
+  notify:
+    needs: [deploy, deploy-docker]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify deployment status
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: always()

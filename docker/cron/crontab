@@ -1,0 +1,18 @@
+# Laravel Scheduler Crontab
+# Запускает планировщик Laravel каждую минуту
+
+* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
+
+# Очистка логов каждый день в 2:00
+0 2 * * * cd /var/www/html && php artisan log:clear >> /dev/null 2>&1
+
+# Очистка кэша каждую неделю в воскресенье в 3:00
+0 3 * * 0 cd /var/www/html && php artisan cache:clear >> /dev/null 2>&1
+
+# Оптимизация базы данных каждый месяц в первое число в 4:00
+0 4 1 * * cd /var/www/html && php artisan db:optimize >> /dev/null 2>&1
+
+# Резервное копирование базы данных каждый день в 1:00
+0 1 * * * cd /var/www/html && php artisan backup:run >> /dev/null 2>&1
+
+# Пустая строка в конце файла обязательна для cron
