@@ -37,8 +37,8 @@ class Product extends Model implements HasMedia
         'title',
         'slug',
         'description',
-        'price_min',
-        'price_max',
+        'price',
+        'old_price',
         'active',
         'meta'
     ];

@@ -24,7 +24,7 @@ class CategoryResource extends JsonResource
             'parent_id' => $this->parent_id,
             'level' => $this->depth ?? 0,
             'has_children' => $this->relationLoaded('children') ? $this->children->isNotEmpty() : ($this->rgt - $this->lft > 1),
-            'products_count' => $this->relationLoaded('products') ? $this->products->count() : 0,
+            'products_count' => $this->products_count ?? ($this->relationLoaded('products') ? $this->products->count() : 0),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             

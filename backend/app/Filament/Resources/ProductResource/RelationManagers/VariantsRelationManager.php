@@ -9,6 +9,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
 class VariantsRelationManager extends RelationManager
 {
@@ -24,16 +26,20 @@ class VariantsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('sku')
-                    ->label('Артикул')
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('price')
                     ->label('Цена')
                     ->required()
                     ->numeric()
                     ->prefix('₽'),
+                Forms\Components\TextInput::make('old_price')
+                    ->label('Старая цена')
+                    ->numeric()
+                    ->prefix('₽'),
+                Forms\Components\TextInput::make('sku')
+                    ->label('Артикул')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('stock')
                     ->label('Количество на складе')
                     ->required()
@@ -41,7 +47,11 @@ class VariantsRelationManager extends RelationManager
                     ->minValue(0),
                 Forms\Components\Toggle::make('is_default')
                     ->label('По умолчанию'),
-
+                SpatieMediaLibraryFileUpload::make('images')
+                    ->collection('images')
+                    ->label('Изображения')
+                    ->responsiveImages()
+                    ->multiple(),
             ]);
     }
 
@@ -50,12 +60,21 @@ class VariantsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('sku')
             ->columns([
+                SpatieMediaLibraryImageColumn::make('images')
+                    ->collection('images')
+                    ->label('Изображение')
+                    ->size(60)
+                    ->circular(false),
                 Tables\Columns\TextColumn::make('sku')
                     ->label('Артикул')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Цена')
+                    ->money('RUB')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('old_price')
+                    ->label('Старая цена')
                     ->money('RUB')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stock')

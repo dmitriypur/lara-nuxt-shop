@@ -16,11 +16,23 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $firstVariant = $this->whenLoaded('variants', function () {
-            return $this->variants->first();
-        });
+        $variants = $this->whenLoaded('variants');
 
-        $price = $firstVariant ? $firstVariant->price : $this->price;
+        $price = $this->price;
+        if ($variants && $variants->isNotEmpty()) {
+            $firstVariant = $variants->first();
+            if ($firstVariant) {
+                $price = $firstVariant->price;
+            }
+        }
+
+        $old_price = $this->old_price;
+        if ($variants && $variants->isNotEmpty()) {
+            $firstVariant = $variants->first();
+            if ($firstVariant && $firstVariant->old_price) {
+                $old_price = $firstVariant->old_price;
+            }
+        }
 
         return [
             'id' => $this->id,
@@ -28,7 +40,7 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'price' => $price,
-            'old_price' => $this->old_price,
+            'old_price' => $old_price,
             'sku' => $this->sku,
             'active' => $this->active,
             'meta' => $this->meta,
