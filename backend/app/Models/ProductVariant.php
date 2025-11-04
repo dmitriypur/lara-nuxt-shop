@@ -12,10 +12,8 @@ class ProductVariant extends Model
         'product_id',
         'sku',
         'price',
-        'stock_quantity',
-        'weight',
-        'dimensions',
-        'active',
+        'stock',
+        'is_default',
     ];
 
     protected $casts = [
@@ -34,4 +32,5 @@ class ProductVariant extends Model
     {
         return $this->belongsToMany(AttributeValue::class, 'attribute_value_product_variant');
     }
+
 }

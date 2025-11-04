@@ -34,15 +34,14 @@ class VariantsRelationManager extends RelationManager
                     ->required()
                     ->numeric()
                     ->prefix('₽'),
-                Forms\Components\TextInput::make('stock_quantity')
+                Forms\Components\TextInput::make('stock')
                     ->label('Количество на складе')
                     ->required()
                     ->numeric()
                     ->minValue(0),
-                Forms\Components\TextInput::make('weight')
-                    ->label('Вес')
-                    ->numeric()
-                    ->suffix(' кг'),
+                Forms\Components\Toggle::make('is_default')
+                    ->label('По умолчанию'),
+
             ]);
     }
 
@@ -59,19 +58,12 @@ class VariantsRelationManager extends RelationManager
                     ->label('Цена')
                     ->money('RUB')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('stock_quantity')
+                Tables\Columns\TextColumn::make('stock')
                     ->label('На складе')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('weight')
-                    ->label('Вес')
-                    ->numeric()
-                    ->suffix(' кг'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Создано')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('is_default')
+                    ->label('По умолчанию')->boolean()->trueColor('info')->falseColor('warning')
             ])
             ->filters([
                 //

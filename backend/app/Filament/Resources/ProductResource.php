@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -52,8 +53,32 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('old_price')
                     ->label(' Старая цена'),
                 Forms\Components\RichEditor::make('description')->columnSpanFull(),
+                Forms\Components\Tabs::make('attributes')
+                    ->tabs(function () {
+                        $attributes = \App\Models\Attribute::with('values')->get();
+                        $tabs = [];
+
+                        foreach ($attributes as $attribute) {
+                            $tabs[] = Forms\Components\Tabs\Tab::make($attribute->name)
+                                ->schema([
+                                    Forms\Components\CheckboxList::make('attributeValues' . $attribute->id)
+                                        ->label($attribute->name)
+                                        ->options($attribute->values->pluck('name', 'id'))
+                                        ->relationship(
+                                            'attributeValues',
+                                            'value',
+                                            fn (Builder $query) => $query->where('attribute_id', $attribute->id)
+                                        )
+                                ]);
+                        }
+                        return $tabs;
+                    })->columnSpanFull(),
             
-                SpatieMediaLibraryFileUpload::make('images')->collection('images')->multiple(),
+                SpatieMediaLibraryFileUpload::make('images')
+                ->collection('images')
+                ->label('Изображения')
+                ->responsiveImages()
+                ->multiple(),
                 Forms\Components\Toggle::make('active')
                     ->label('Активен')
                     ->default(true),
@@ -68,9 +93,15 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->label('Название'),
+                SpatieMediaLibraryImageColumn::make('images')
+                    ->collection('images')
+                    ->label('Изображение')
+                    ->size(60)
+                    ->circular(false),
+                Tables\Columns\TextColumn::make('title')->label('Название')->searchable(),
                 Tables\Columns\TextColumn::make('slug')->label('Слаг'),
-                Tables\Columns\TextColumn::make('description')->label('Описание'),
+                Tables\Columns\TextColumn::make('price')->label('Цена')->money('RUB'),
+                Tables\Columns\IconColumn::make('active')->label('Активен')->boolean(),
             ])
             ->filters([
                 //

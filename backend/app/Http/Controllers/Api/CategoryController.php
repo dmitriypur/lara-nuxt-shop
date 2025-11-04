@@ -18,13 +18,11 @@ class CategoryController extends Controller
     /**
      * Получить все категории в виде дерева
      */
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
-        $categories = Category::with('children')->whereIsRoot()->defaultOrder()->get();
+        $categories = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
         
-        return response()->json([
-            'data' => CategoryResource::collection($categories),
-        ]);
+        return CategoryResource::collection($categories);
     }
 
     /**
@@ -32,7 +30,7 @@ class CategoryController extends Controller
      */
     public function roots(): AnonymousResourceCollection
     {
-        $categories = Category::whereIsRoot()->defaultOrder()->get();
+        $categories = Category::whereNull('parent_id')->orderBy('name')->get();
         
         return CategoryResource::collection($categories);
     }
@@ -82,30 +80,41 @@ class CategoryController extends Controller
         // Получаем ID категории и всех её потомков
         $categoryIds = $category->descendants()->pluck('id')->push($category->id);
         
-        $query = Product::with(['categories'])
+        $query = Product::with(['categories', 'media', 'variants'])
             ->whereHas('categories', function ($q) use ($categoryIds) {
                 $q->whereIn('categories.id', $categoryIds);
             });
 
-        // Фильтр по цене
-        if ($request->has('min_price')) {
-            $query->where('price', '>=', $request->get('min_price'));
+        // Поиск по названию
+        if ($request->has('search') && $request->get('search')) {
+            $search = $request->get('search');
+            $query->where('title', 'LIKE', "%{$search}%");
         }
 
-        if ($request->has('max_price')) {
-            $query->where('price', '<=', $request->get('max_price'));
+        // Фильтр по цене
+        if ($request->has('price_from') && $request->get('price_from') !== '') {
+            $query->where('price', '>=', $request->get('price_from'));
+        }
+
+        if ($request->has('price_to') && $request->get('price_to') !== '') {
+            $query->where('price', '<=', $request->get('price_to'));
         }
 
         // Сортировка
-        $sortBy = $request->get('sort_by', 'created_at');
+        $sortBy = $request->get('sort', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         
-        $allowedSortFields = ['name', 'price', 'created_at'];
+        $allowedSortFields = ['title', 'price', 'created_at'];
         if (in_array($sortBy, $allowedSortFields)) {
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        $products = $query->paginate($request->get('per_page', 15));
+        // Фильтр по наличию на складе (используем колонку active)
+        if ($request->has('in_stock') && $request->get('in_stock')) {
+            $query->where('active', true);
+        }
+
+        $products = $query->paginate($request->get('per_page', 12));
 
         return ProductResource::collection($products);
     }

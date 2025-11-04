@@ -57,6 +57,11 @@ class Product extends Model implements HasMedia
         return $this->belongsToMany(Category::class);
     }
 
+    public function attributeValues(): BelongsToMany
+    {
+        return $this->belongsToMany(AttributeValue::class, 'attribute_value_product_variant', 'product_variant_id', 'attribute_value_id');
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('images')
@@ -68,11 +73,27 @@ class Product extends Model implements HasMedia
         $this->addMediaConversion('thumb')
             ->width(400)
             ->height(400)
+            ->quality(85)
             ->nonQueued();
 
         $this->addMediaConversion('large')
             ->width(1200)
-            ->quality(80);
+            ->quality(80)
+            ->nonQueued();
+
+        // WebP conversions for better performance
+        $this->addMediaConversion('webp_thumb')
+            ->width(400)
+            ->height(400)
+            ->format('webp')
+            ->quality(85)
+            ->nonQueued();
+
+        $this->addMediaConversion('webp_large')
+            ->width(1200)
+            ->format('webp')
+            ->quality(80)
+            ->nonQueued();
     }
 
     public function toSearchableArray(): array

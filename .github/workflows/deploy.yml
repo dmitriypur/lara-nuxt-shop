@@ -80,7 +80,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: false  # Temporarily disabled during development
     
     steps:
     - uses: actions/checkout@v4
@@ -108,7 +108,7 @@ jobs:
   deploy-docker:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: false  # Temporarily disabled during development
     
     steps:
     - uses: actions/checkout@v4

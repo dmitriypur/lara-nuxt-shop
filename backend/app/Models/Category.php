@@ -49,14 +49,5 @@ class Category extends Model
         return $query->whereNull('parent_id');
     }
 
-    public function setParentIdAttribute($value)
-    {
-        // Для существующих узлов просто устанавливаем parent_id без использования appendToNode
-        if ($this->exists) {
-            $this->attributes['parent_id'] = $value;
-        } else {
-            // Для новых узлов используем стандартное поведение NodeTrait
-            parent::setParentIdAttribute($value);
-        }
-    }
+
 }

@@ -16,27 +16,56 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $firstVariant = $this->whenLoaded('variants', function () {
+            return $this->variants->first();
+        });
+
+        $price = $firstVariant ? $firstVariant->price : $this->price;
+
         return [
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
             'description' => $this->description,
-            'short_description' => $this->short_description,
-            'price' => $this->price,
-            'compare_price' => $this->compare_price,
+            'price' => $price,
+            'old_price' => $this->old_price,
             'sku' => $this->sku,
-            'stock_quantity' => $this->stock_quantity,
-            'weight' => $this->weight,
-            'dimensions' => $this->dimensions,
-            'is_active' => $this->is_active,
-            'is_featured' => $this->is_featured,
-            'meta_title' => $this->meta_title,
-            'meta_description' => $this->meta_description,
+            'active' => $this->active,
+            'meta' => $this->meta,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'category' => new CategoryResource($this->whenLoaded('category')),
+            'categories' => CategoryResource::collection($this->whenLoaded('categories')),
             'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),
-            'attributes' => ProductAttributeResource::collection($this->whenLoaded('attributes')),
+            'image' => $this->whenLoaded('media', function () {
+                $media = $this->getFirstMedia('images');
+                if (!$media) {
+                    return null;
+                }
+                return [
+                    'id' => $media->id,
+                    'url' => $media->getUrl(),
+                    'thumb' => $media->getUrl('thumb'),
+                    'large' => $media->getUrl('large'),
+                    'webp_thumb' => $media->getUrl('webp_thumb'),
+                    'webp_large' => $media->getUrl('webp_large'),
+                ];
+            }),
+            'images' => $this->whenLoaded('media', function () {
+                return $this->getMedia('images')->map(function ($media) {
+                    return [
+                        'id' => $media->id,
+                        'url' => $media->getUrl(),
+                        'thumb' => $media->getUrl('thumb'),
+                        'large' => $media->getUrl('large'),
+                        'webp_thumb' => $media->getUrl('webp_thumb'),
+                        'webp_large' => $media->getUrl('webp_large'),
+                        'name' => $media->name,
+                        'file_name' => $media->file_name,
+                        'mime_type' => $media->mime_type,
+                        'size' => $media->size,
+                    ];
+                });
+            }),
         ];
     }
 }
