@@ -31,16 +31,15 @@
           
           <!-- Категория -->
           <div v-if="product.category" class="mb-2">
-                    <NuxtLink 
-          :to="`/categories/${product.category.slug}`"
-          class="inline-block bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded hover:bg-blue-200 transition-colors"
->
-          {{ product.category.name }}
-        </NuxtLink>
+            <NuxtLink 
+              :to="`/categories/${product.category.slug}`"
+              class="inline-block bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded hover:bg-blue-200 transition-colors"
+            >
+              {{ product.category.name }}
+            </NuxtLink>
           </div>
           
-          <p v-if="product.description" class="text-gray-600 mb-3 line-clamp-3">
-            {{ product.description }}
+          <p v-if="product.description" v-html="product.description" class="text-gray-600 mb-3 line-clamp-3">
           </p>
           
           <!-- Рейтинг -->

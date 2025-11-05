@@ -86,11 +86,7 @@
             {{ formatPrice(product.old_price) }} ₽
           </span>
         </div>
-        
-        <!-- Краткое описание -->
-        <div v-if="product.description">
-          <p class="text-gray-600 leading-relaxed">{{ product.description }}</p>
-        </div>
+      
         
         <!-- Варианты товара -->
         <div v-if="product.variants && product.variants.length > 0" class="space-y-4">
@@ -206,7 +202,7 @@ const { getProduct } = useApi()
 const route = useRoute()
 const cartStore = useCartStore()
 
-const productSlug = route.params.slug
+const productSlug = route.params.slug;
 
 // Реактивные данные
 const selectedImage = ref(null)
@@ -215,15 +211,22 @@ const quantity = ref(1)
 const isFavorite = ref(false)
 
 // Загрузка товара
-const { data: productData, pending, error, refresh } = await useLazyAsyncData(`product-${productSlug}`, async () => {
-  const { data, error: apiError } = await getProduct(productSlug)
-  if (apiError) throw apiError
-  return data
-}, {
-  server: false
-})
+ const { data: productData, pending, error, refresh } = useLazyAsyncData(
+   `product-${productSlug}`,
+   async () => {
+     const response = await getProduct(productSlug);
+     if (response.error) {
+       // Создаем и выбрасываем ошибку, чтобы ее поймал `error` из `useLazyAsyncData`
+       throw createError({ statusCode: 500, statusMessage: 'Failed to fetch product', fatal: true });
+     }
+     return response.data; // Возвращаем только данные
+   },
+   {
+     transform: (response) => response.data,
+   }
+ );
 
-const product = computed(() => productData.value)
+const product = computed(() => productData.value);
 
 // Хлебные крошки
 const breadcrumbs = computed(() => {

@@ -16,7 +16,7 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $variants = $this->whenLoaded('variants');
+        $variants = $this->relationLoaded('activeVariants') ? $this->whenLoaded('activeVariants') : $this->whenLoaded('variants');
 
         $price = $this->price;
         if ($variants && $variants->isNotEmpty()) {
@@ -47,7 +47,7 @@ class ProductResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),
-            'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),
+            'variants' => ProductVariantResource::collection($this->whenLoaded('activeVariants')),
             'image' => $this->whenLoaded('media', function () {
                 $media = $this->getFirstMedia('images');
                 if (!$media) {

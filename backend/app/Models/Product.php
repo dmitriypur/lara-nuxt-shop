@@ -52,6 +52,11 @@ class Product extends Model implements HasMedia
         return $this->hasMany(ProductVariant::class);
     }
 
+    public function activeVariants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->where('active', true);
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class);

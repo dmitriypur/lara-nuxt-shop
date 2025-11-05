@@ -43,8 +43,8 @@
         </NuxtLink>
       </div>
       
-      <p v-if="product.description" class="text-gray-600 text-sm mb-3 line-clamp-2">
-        {{ product.description }}
+      <p v-if="product.description" v-html="product.description" class="text-gray-600 text-sm mb-3 line-clamp-2">
+        
       </p>
       
       <!-- Рейтинг -->
