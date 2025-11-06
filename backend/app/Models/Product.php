@@ -88,6 +88,16 @@ class Product extends Model implements HasMedia
             ->wherePivot('type', 'base');
     }
 
+    /**
+     * Синхронизировать selected-атрибуты базового товара из его base-атрибутов.
+     * Делает selected единственным источником истины для фронта.
+     */
+    public function syncSelectedFromBase(): void
+    {
+        $ids = $this->baseAttributeValues()->pluck('attribute_values.id')->all();
+        $this->attributeValues()->syncWithPivotValues($ids, ['type' => 'selected']);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('images')

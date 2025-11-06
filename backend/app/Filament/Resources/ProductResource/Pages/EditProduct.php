@@ -33,6 +33,9 @@ class EditProduct extends EditRecord
         }
 
         $ids = array_values(array_unique($ids));
+        // Пишем base
         $this->record->baseAttributeValues()->syncWithPivotValues($ids, ['type' => 'base']);
+        // И сразу делаем selected источником истины для фронта
+        $this->record->attributeValues()->syncWithPivotValues($ids, ['type' => 'selected']);
     }
 }
