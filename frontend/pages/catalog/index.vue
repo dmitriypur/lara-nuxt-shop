@@ -230,7 +230,7 @@ useHead({
 // Реактивные данные
 const searchQuery = ref(route.query.search || '')
 const selectedCategory = ref(route.query.category || '')
-const sortBy = ref(route.query.sort || 'name')
+const sortBy = ref(route.query.sort || 'title')
 const priceFrom = ref(route.query.price_from || '')
 const priceTo = ref(route.query.price_to || '')
 const inStock = ref(route.query.in_stock === 'true')
@@ -329,7 +329,7 @@ const updateURL = () => {
     page: currentPage.value > 1 ? currentPage.value : undefined,
     search: searchQuery.value || undefined,
     category: selectedCategory.value || undefined,
-    sort: sortBy.value !== 'name' ? sortBy.value : undefined,
+    sort: sortBy.value !== 'title' ? sortBy.value : undefined,
     price_from: priceFrom.value || undefined,
     price_to: priceTo.value || undefined,
     in_stock: inStock.value || undefined

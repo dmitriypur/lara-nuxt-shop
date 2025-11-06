@@ -65,6 +65,7 @@
             Все категории →
           </NuxtLink>
         </div>
+
         <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div v-for="category in categories.data" :key="category.id" class="card animate-pulse">
             <div class="h-48 bg-gray-300">{{ category.name }}</div>

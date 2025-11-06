@@ -2,9 +2,9 @@
   <div class="card hover:shadow-lg transition-shadow group">
     <!-- Изображение товара -->
     <div class="relative h-48 bg-gray-200 overflow-hidden">
-      <img 
-        v-if="product.image" 
-        :src="product.image.webp_thumb || product.image.thumb || product.image.url" 
+        <img 
+        v-if="product.images && product.images.length > 0" 
+        :src="product.images[0].thumb || product.images[0].url" 
         :alt="product.title || product.name"
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
       >

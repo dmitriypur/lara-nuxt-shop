@@ -11,31 +11,29 @@ class ProductResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $product = $this->resource;
-
         // Если это вариант, и у него нет своих изображений, используем изображения родителя
-        $media = $product->whenLoaded('media');
-        if ($product->parent_id && $media->isEmpty()) {
-            $media = $product->parent->whenLoaded('media');
+        $media = $this->getMedia('images');
+        if ($this->parent_id && $media->isEmpty() && $this->relationLoaded('parent')) {
+            $media = $this->parent->getMedia('images');
         }
 
         // Аналогично для категорий
-        $categories = $product->whenLoaded('categories');
-        if ($product->parent_id && $categories->isEmpty()) {
-            $categories = $product->parent->whenLoaded('categories');
+        $categories = $this->relationLoaded('categories') ? $this->categories : collect();
+        if ($this->parent_id && $categories->isEmpty() && $this->relationLoaded('parent')) {
+            $categories = $this->parent->categories;
         }
 
         return [
-            'id' => $product->id,
-            'parent_id' => $product->parent_id,
-            'title' => $product->title,
-            'slug' => $product->slug,
-            'description' => $product->description,
-            'price' => (float) $product->price,
-            'old_price' => (float) $product->old_price,
-            'stock' => (int) $product->stock,
-            'sku' => $product->sku,
-            'active' => (bool) $product->active,
+            'id' => $this->id,
+            'parent_id' => $this->parent_id,
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'description' => $this->description,
+            'price' => (float) $this->price,
+            'old_price' => (float) $this->old_price,
+            'stock' => (int) $this->stock,
+            'sku' => $this->sku,
+            'active' => (bool) $this->active,
             'categories' => CategoryResource::collection($categories),
             'variants' => ProductResource::collection($this->whenLoaded('variants')),
             'images' => $media->map(function ($image) {
