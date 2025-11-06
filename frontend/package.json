@@ -14,6 +14,7 @@
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@pinia/nuxt": "^0.11.2",
     "nuxt": "^3.13.0",
+    "nuxt-hero-icons": "^0.0.9",
     "pinia": "^3.0.3",
     "vue": "^3.4.0",
     "vue-router": "^4.4.0"
