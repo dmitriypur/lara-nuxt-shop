@@ -20,17 +20,25 @@ class ProductResource extends Resource
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    
+
     protected static ?string $navigationLabel = 'Товары';
-    
+
     protected static ?string $modelLabel = 'Товар';
-    
+
     protected static ?string $pluralModelLabel = 'Товары';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->whereNull('parent_id');
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('parent_id')
+                    ->relationship('parent', 'title')
+                    ->label('Родительский товар'),
                 Forms\Components\TextInput::make('title')->required(),
                 Forms\Components\TextInput::make('slug')
                     ->disabled()
@@ -47,38 +55,18 @@ class ProductResource extends Resource
                     ->options(function () {
                         return \App\Models\Category::orderBy('_lft')->get()->pluck('indented_name', 'id');
                     }),
-            
+
                 Forms\Components\TextInput::make('price')
                     ->label('Цена'),
                 Forms\Components\TextInput::make('old_price')
                     ->label(' Старая цена'),
                 Forms\Components\RichEditor::make('description')->columnSpanFull(),
-                Forms\Components\Tabs::make('attributes')
-                    ->tabs(function () {
-                        $attributes = \App\Models\Attribute::with('values')->get();
-                        $tabs = [];
 
-                        foreach ($attributes as $attribute) {
-                            $tabs[] = Forms\Components\Tabs\Tab::make($attribute->name)
-                                ->schema([
-                                    Forms\Components\CheckboxList::make('attributeValues' . $attribute->id)
-                                        ->label($attribute->name)
-                                        ->options($attribute->values->pluck('name', 'id'))
-                                        ->relationship(
-                                            'attributeValues',
-                                            'value',
-                                            fn (Builder $query) => $query->where('attribute_id', $attribute->id)
-                                        )
-                                ]);
-                        }
-                        return $tabs;
-                    })->columnSpanFull(),
-            
                 SpatieMediaLibraryFileUpload::make('images')
-                ->collection('images')
-                ->label('Изображения')
-                ->responsiveImages()
-                ->multiple(),
+                    ->collection('images')
+                    ->label('Изображения')
+                    ->responsiveImages()
+                    ->multiple(),
                 Forms\Components\Toggle::make('active')
                     ->label('Активен')
                     ->default(true),
@@ -119,7 +107,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\VariantsRelationManager::class,
+            RelationManagers\ProductVariantsRelationManager::class,
         ];
     }
 

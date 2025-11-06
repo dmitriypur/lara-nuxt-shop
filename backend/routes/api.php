@@ -27,5 +27,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/categories/{slug}/products', [CategoryController::class, 'products']); // Товары категории
     
     // Search
-    Route::get('/search', [ProductController::class, 'search']);
+    Route::get('products/search', [ProductController::class, 'search']);
+    Route::get('products/{product:slug}', [ProductController::class, 'show']);
+    Route::get('products/{product}/related', [ProductController::class, 'related']);
+    
+    Route::get('categories', [CategoryController::class, 'index']);
+    Route::get('categories/{category:slug}', [CategoryController::class, 'show']);
 });

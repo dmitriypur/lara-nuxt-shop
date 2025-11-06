@@ -15,8 +15,23 @@ class ProductController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Product::with(['categories', 'variants', 'media'])
-            ->where('active', true);
+        $query = Product::with(['categories', 'media'])
+            ->where('active', true)
+            ->whereNull('parent_id');
+
+        // Filter by popular
+        if ($request->boolean('popular')) {
+            $query->orderBy('created_at', 'desc');
+        } 
+        // Sorting
+        else if ($request->has('sort')) {
+            $sortBy = $request->get('sort', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            // Default sort
+            $query->orderBy('created_at', 'desc');
+        }
 
         // Filter by category
         if ($request->has('category')) {
@@ -27,18 +42,19 @@ class ProductController extends Controller
 
         // Price range filter
         if ($request->has('price_min')) {
-            $query->where('price_min', '>=', $request->price_min);
+            $query->where('price', '>=', $request->price_min);
         }
         if ($request->has('price_max')) {
-            $query->where('price_max', '<=', $request->price_max);
+            $query->where('price', '<=', $request->price_max);
         }
 
-        // Sorting
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
+        $limit = $request->get('limit');
 
-        $products = $query->paginate($request->get('per_page', 12));
+        if ($limit) {
+            $products = $query->limit((int)$limit)->get();
+        } else {
+            $products = $query->paginate($request->get('per_page', 12));
+        }
 
         return ProductResource::collection($products);
     }
@@ -49,9 +65,14 @@ class ProductController extends Controller
             abort(404, 'Product not found');
         }
 
-        $product->load(['categories', 'variants' => function ($query) {
-            $query->where('active', true);
-        }, 'media']);
+        // Если это вариант, загружаем данные родителя
+        if ($product->parent_id) {
+            $product->load(['parent.media', 'parent.categories']);
+        } else {
+            $product->load(['media', 'categories']);
+        }
+
+        $product->load(['variants' => fn ($q) => $q->where('active', true)]);
 
         return new ProductResource($product);
     }
@@ -70,5 +91,22 @@ class ProductController extends Controller
             ->paginate($request->get('per_page', 12));
 
         return ProductResource::collection($products);
+    }
+
+    public function related(Product $product): AnonymousResourceCollection
+    {
+        $relatedProducts = collect();
+
+        $productToLoad = $product->parent_id ? $product->parent : $product;
+
+        $productToLoad->load(['media', 'categories', 'variants' => fn ($q) => $q->with(['media', 'categories'])->where('active', true)]);
+
+        $relatedProducts->push($productToLoad);
+        $productToLoad->variants->each(fn ($variant) => $relatedProducts->push($variant));
+
+        // Убираем дубликаты и фильтруем только активные
+        $uniqueProducts = $relatedProducts->unique('id')->where('active', true);
+
+        return ProductResource::collection($uniqueProducts);
     }
 }

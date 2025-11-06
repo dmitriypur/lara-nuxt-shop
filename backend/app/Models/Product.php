@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Scout\Searchable;
 use Spatie\MediaLibrary\HasMedia;
@@ -33,6 +34,7 @@ class Product extends Model implements HasMedia
     }
 
     protected $fillable = [
+        'parent_id',
         'sku',
         'title',
         'slug',
@@ -47,14 +49,19 @@ class Product extends Model implements HasMedia
         'meta' => 'array',
     ];
 
-    public function variants(): HasMany
+    public function getRouteKeyName(): string
     {
-        return $this->hasMany(ProductVariant::class);
+        return 'slug';
     }
 
-    public function activeVariants(): HasMany
+    public function parent(): BelongsTo
     {
-        return $this->hasMany(ProductVariant::class)->where('active', true);
+        return $this->belongsTo(Product::class, 'parent_id');
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(Product::class, 'parent_id');
     }
 
     public function categories(): BelongsToMany
@@ -111,13 +118,5 @@ class Product extends Model implements HasMedia
             'price_min'   => $this->price_min,
             'price_max'   => $this->price_max,
         ];
-    }
-
-    /**
-     * Get the route key for the model.
-     */
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
     }
 }

@@ -6,9 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -28,64 +26,91 @@ class ProductSeeder extends Seeder
             ['name' => 'Одежда']
         );
 
-        // Create products
-        $products = [
+        // Create parent products
+        $parentProducts = [
             [
-                'title' => 'iPhone 15 Pro',
-                'slug' => 'iphone-15-pro',
+                'title'       => 'iPhone 15 Pro',
+                'slug'        => 'iphone-15-pro',
                 'description' => 'Новый iPhone 15 Pro с чипом A17 Pro',
-                'price' => 99999.00,
-                'old_price' => 109999.00,
-                'sku' => 'IPHONE15PRO',
-                'active' => true,
+                'price'       => 99999.00,
+                'old_price'   => 109999.00,
+                'sku'         => 'IPHONE15PRO',
+                'active'      => true,
+                'category'    => $electronics,
             ],
             [
-                'title' => 'MacBook Pro 14"',
-                'slug' => 'macbook-pro-14',
+                'title'       => 'MacBook Pro 14"',
+                'slug'        => 'macbook-pro-14',
                 'description' => 'MacBook Pro 14 дюймов с чипом M3',
-                'price' => 199999.00,
-                'sku' => 'MBP14M3',
-                'active' => true,
+                'price'       => 199999.00,
+                'sku'         => 'MBP14M3',
+                'active'      => true,
+                'category'    => $electronics,
             ],
             [
-                'title' => 'Футболка базовая',
-                'slug' => 'basic-tshirt',
+                'title'       => 'Футболка базовая',
+                'slug'        => 'basic-tshirt',
                 'description' => 'Базовая футболка из 100% хлопка',
-                'price' => 1999.00,
-                'sku' => 'TSHIRT001',
-                'active' => true,
+                'price'       => 1999.00,
+                'sku'         => 'TSHIRT001',
+                'active'      => true,
+                'category'    => $clothing,
             ],
         ];
 
-        foreach ($products as $productData) {
+        foreach ($parentProducts as $productData) {
+            $category = $productData['category'];
+            unset($productData['category']);
+
             $product = Product::firstOrCreate(
                 ['slug' => $productData['slug']],
                 $productData
             );
+            $product->categories()->sync([$category->id]);
 
-            // Create variants for each product
-            if ($product->title === 'iPhone 15 Pro') {
-                ProductVariant::create([
-                    'product_id' => $product->id,
-                    'sku' => 'IPHONE15PRO-128GB',
-                    'price' => 99999.00,
-                    'stock' => 30,
-                ]);
-                ProductVariant::create([
-                    'product_id' => $product->id,
-                    'sku' => 'IPHONE15PRO-256GB',
-                    'price' => 109999.00,
-                    'stock' => 20,
-                ]);
-            } elseif ($product->title === 'Футболка базовая') {
+            // Create variants
+            if ($product->slug === 'iphone-15-pro') {
+                $variants = [
+                    [
+                        'parent_id'   => $product->id,
+                        'title'       => 'iPhone 15 Pro 128GB',
+                        'slug'        => 'iphone-15-pro-128gb',
+                        'description' => 'Новый iPhone 15 Pro 128GB с чипом A17 Pro',
+                        'price'       => 99999.00,
+                        'sku'         => 'IPHONE15PRO-128GB',
+                        'stock'       => 30,
+                        'active'      => true,
+                    ],
+                    [
+                        'parent_id'   => $product->id,
+                        'title'       => 'iPhone 15 Pro 256GB',
+                        'slug'        => 'iphone-15-pro-256gb',
+                        'description' => 'Новый iPhone 15 Pro 256GB с чипом A17 Pro',
+                        'price'       => 109999.00,
+                        'sku'         => 'IPHONE15PRO-256GB',
+                        'stock'       => 20,
+                        'active'      => true,
+                    ],
+                ];
+                foreach ($variants as $variantData) {
+                    $variant = Product::create($variantData);
+                    $variant->categories()->sync([$category->id]);
+                }
+            } elseif ($product->slug === 'basic-tshirt') {
                 $sizes = ['S', 'M', 'L', 'XL'];
                 foreach ($sizes as $size) {
-                    ProductVariant::create([
-                        'product_id' => $product->id,
-                        'sku' => "TSHIRT001-{$size}",
-                        'price' => 1999.00,
-                        'stock' => 25,
-                    ]);
+                    $variantData = [
+                        'parent_id'   => $product->id,
+                        'title'       => "Футболка базовая ({$size})",
+                        'slug'        => "basic-tshirt-{$size}",
+                        'description' => "Базовая футболка из 100% хлопка, размер {$size}",
+                        'price'       => 1999.00,
+                        'sku'         => "TSHIRT001-{$size}",
+                        'stock'       => 25,
+                        'active'      => true,
+                    ];
+                    $variant = Product::create($variantData);
+                    $variant->categories()->sync([$category->id]);
                 }
             }
         }
