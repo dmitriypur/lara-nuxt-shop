@@ -27,7 +27,6 @@
 
     <!-- Основной контент страницы товара -->
     <div v-if="product" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
       <!-- Галерея изображений -->
       <div class="space-y-4">
         <div class="relative">
@@ -81,23 +80,29 @@
         </div>
 
         <!-- Варианты -->
-        <div v-if="relatedProducts && relatedProducts.length > 1" class="space-y-4">
+        <div v-if="variantsToShow && variantsToShow.length > 0" class="space-y-4">
           <h3 class="text-lg font-semibold text-gray-900">Варианты</h3>
           <div class="flex flex-wrap gap-3">
             <NuxtLink
-              v-for="related in relatedProducts"
-              :key="related.id"
-              :to="`/products/${related.slug}`"
-              :class="product.id === related.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'ring-1 ring-gray-200'"
+              v-for="variant in variantsToShow"
+              :key="variant.id"
+              :to="`/products/${variant.slug}`"
+              :class="product.id === variant.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'ring-1 ring-gray-200'"
               class="p-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2 text-decoration-none"
             >
-              <img 
-                v-if="related.images && related.images.length > 0"
-                :src="related.images[0].thumb"
-                :alt="related.title"
-                class="w-10 h-10 object-cover rounded-md"
-              >
-              <span class="text-sm font-medium text-gray-800">{{ related.title }}</span>
+              <template v-if="getVariantThumb(variant)">
+                <img 
+                  :src="getVariantThumb(variant)"
+                  :alt="variant.title"
+                  class="w-10 h-10 object-cover rounded-md"
+                >
+              </template>
+              <template v-else>
+                <div class="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400">
+                  <Icon name="heroicons:photo" class="w-6 h-6" />
+                </div>
+              </template>
+              <span class="text-sm font-medium text-gray-800">{{ variant.title }}</span>
             </NuxtLink>
           </div>
         </div>
@@ -129,20 +134,42 @@ import { useCartStore } from '@/stores/cart';
 const route = useRoute();
 const cartStore = useCartStore();
 
-const { data: product, pending, error, refresh } = useAsyncData(
-  `product-${route.params.slug}`,
-  () => $fetch(`/api/products/${route.params.slug}`),
-  { watch: [() => route.params.slug] }
-);
+// Используем единый композабл для API с базовым URL из runtimeConfig
+const { getProduct, apiCall } = useApi()
 
-const { data: relatedProducts } = useAsyncData(
-  `related-products-${route.params.slug}`,
-  () => {
-    if (!product.value?.id) return Promise.resolve([]);
-    return $fetch(`/api/products/${product.value.id}/related`);
+// Загружаем товар по slug и разворачиваем ответ { data: { ... } } -> объект товара
+const { data: productData, pending, error, refresh } = await useLazyAsyncData(
+  `product-${route.params.slug}`,
+  async () => {
+    const { data, error } = await getProduct(route.params.slug)
+    if (error) throw error
+    return data
   },
-  { watch: [product] }
-);
+  { server: false, watch: [() => route.params.slug] }
+)
+
+// Приводим к удобному виду
+const product = computed(() => productData.value?.data || null)
+
+// Группа связанных товаров (родитель + его варианты) из backend-эндпоинта
+const { data: relatedData } = await useLazyAsyncData(
+  `related-products-${route.params.slug}`,
+  async () => {
+    const slug = product.value?.slug || route.params.slug
+    if (!slug) return { data: [] }
+    const { data } = await apiCall(`/v1/products/${slug}/related`)
+    return data
+  },
+  { server: false, watch: [product, () => route.params.slug] }
+)
+
+const variantsToShow = computed(() => {
+  const currentId = product.value?.id
+  const group = relatedData.value?.data || []
+  return group.filter((v) => v.id !== currentId)
+})
+
+const getVariantThumb = (v) => v?.images?.[0]?.thumb || v?.images?.[0]?.url || null
 
 const selectedImage = ref(null);
 

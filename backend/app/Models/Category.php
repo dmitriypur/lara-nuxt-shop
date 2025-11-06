@@ -28,6 +28,11 @@ class Category extends Model
         return $this->belongsToMany(Product::class);
     }
 
+    public function attributes(): BelongsToMany
+    {
+        return $this->belongsToMany(Attribute::class, 'attribute_category');
+    }
+
     public function getFullNameAttribute(): string
     {
         $ancestors = $this->ancestors()->pluck('name')->toArray();

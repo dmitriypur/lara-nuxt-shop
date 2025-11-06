@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
+use App\Models\Attribute;
+use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -74,6 +76,69 @@ class ProductResource extends Resource
                     ->label('Мета Title'),
                 Forms\Components\TextInput::make('meta.description')
                     ->label('Мета Description'),
+                Forms\Components\Section::make('Характеристики')
+                    ->schema([
+                        Forms\Components\Grid::make(3)
+                            ->schema(function (Forms\Get $get, ?Product $record) {
+                                $selectedCategoryIds = $get('categories') ?? [];
+                                // Если запись существует и у неё есть категории, используем их приоритетно
+                                if ($record && $record->exists && empty($selectedCategoryIds)) {
+                                    $selectedCategoryIds = $record->categories()->pluck('categories.id')->toArray();
+                                }
+
+                                // Если категорий нет — не показываем характеристики
+                                if (empty($selectedCategoryIds)) {
+                                    return [
+                                        Forms\Components\Placeholder::make('no_categories')
+                                            ->label('')
+                                            ->content('Выберите категории — и здесь появятся доступные характеристики.'),
+                                    ];
+                                }
+
+                                // Собираем ID выбранных категорий и всех их предков (наследование атрибутов)
+                                $allCategoryIds = [];
+                                $categories = Category::whereIn('id', $selectedCategoryIds)->get();
+                                foreach ($categories as $cat) {
+                                    $ancestorIds = $cat->ancestors()->pluck('id')->toArray();
+                                    $allCategoryIds = array_merge($allCategoryIds, $ancestorIds, [$cat->id]);
+                                }
+                                $allCategoryIds = array_values(array_unique($allCategoryIds));
+
+                                // Берём атрибуты, привязанные к любой из этих категорий
+                                $attributes = Attribute::whereHas('categories', function ($q) use ($allCategoryIds) {
+                                        $q->whereIn('categories.id', $allCategoryIds);
+                                    })
+                                    ->with('values')
+                                    ->orderBy('name')
+                                    ->get();
+
+                                // Строим компоненты для каждого атрибута
+                                $components = [];
+                                foreach ($attributes as $attribute) {
+                                    $components[] = Forms\Components\Fieldset::make($attribute->name)
+                                        ->schema([
+                                            Forms\Components\CheckboxList::make('attr_' . $attribute->id)
+                                                ->label('')
+                                                ->options($attribute->values->pluck('value', 'id')->toArray())
+                                                ->columns(3)
+                                                ->dehydrated(false)
+                                                ->default(function ($record) use ($attribute) {
+                                                    if (!$record) {
+                                                        return [];
+                                                    }
+                                                    return $record->baseAttributeValues()
+                                                        ->where('attribute_id', $attribute->id)
+                                                        ->pluck('attribute_values.id')
+                                                        ->toArray();
+                                                }),
+                                        ]);
+                                }
+
+                                return $components;
+                            }),
+                    ])
+                    ->collapsed()
+                    ->collapsible(),
             ]);
     }
 

@@ -74,6 +74,14 @@ class Product extends Model implements HasMedia
         return $this->belongsToMany(AttributeValue::class, 'attribute_value_product_variant', 'product_variant_id', 'attribute_value_id');
     }
 
+    /**
+     * Характеристики (значения атрибутов), назначенные базовому товару (не варианту)
+     */
+    public function baseAttributeValues(): BelongsToMany
+    {
+        return $this->belongsToMany(AttributeValue::class, 'attribute_value_product', 'product_id', 'attribute_value_id');
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('images')

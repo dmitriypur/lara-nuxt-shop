@@ -15,8 +15,7 @@ class ProductController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Product::with(['categories', 'media'])
-            ->where('active', true)
-            ->whereNull('parent_id');
+            ->where('active', true);
 
         // Filter by popular
         if ($request->boolean('popular')) {

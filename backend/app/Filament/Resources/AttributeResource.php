@@ -36,6 +36,16 @@ class AttributeResource extends Resource
                             'select' => 'Выпадающий список',
                             'color' => 'Цвет',
                         ]),
+                Forms\Components\Select::make('categories')
+                    ->label('Категории, где доступен атрибут')
+                    ->relationship('categories', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->options(function () {
+                        return \App\Models\Category::orderBy('_lft')->get()->pluck('indented_name', 'id');
+                    })
+                    ->helperText('Если выбрана родительская категория, атрибут будет доступен и в её дочерних категориях.'),
             ]);
     }
 
@@ -46,6 +56,10 @@ class AttributeResource extends Resource
                 Tables\Columns\TextColumn::make('id'),
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('slug'),
+                Tables\Columns\TextColumn::make('categories_count')
+                    ->counts('categories')
+                    ->label('Категорий')
+                    ->badge(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
