@@ -120,9 +120,70 @@ class ProductVariantsRelationManager extends RelationManager
 
                                 // Формируем компоненты
                                 $components = [];
+
+                                // Глобальные действия: включить все / очистить все характеристики варианта (как текстовые ссылки)
+                                $components[] = Forms\Components\Actions::make([
+                                    Forms\Components\Actions\Action::make('enable_all_variant_attributes')
+                                        ->label('Включить все характеристики')
+                                        ->link()
+                                        ->color('gray')
+                                        ->action(function (callable $set, callable $get) use ($attributes, $attributeIds) {
+                                            foreach ($attributes as $attribute) {
+                                                $set('attr_' . $attribute->id, $attribute->values->pluck('id')->toArray());
+                                            }
+
+                                            // Обновляем сводный список для sync
+                                            $ids = [];
+                                            foreach ($attributeIds as $id) {
+                                                $ids = array_merge($ids, array_filter((array) ($get('attr_' . $id) ?? [])));
+                                            }
+                                            $set('attributeValuesSync', array_values(array_unique($ids)));
+                                        }),
+                                    Forms\Components\Actions\Action::make('clear_all_variant_attributes')
+                                        ->label('Очистить все характеристики')
+                                        ->link()
+                                        ->color('gray')
+                                        ->action(function (callable $set) use ($attributes) {
+                                            foreach ($attributes as $attribute) {
+                                                $set('attr_' . $attribute->id, []);
+                                            }
+                                            // Полная очистка
+                                            $set('attributeValuesSync', []);
+                                        }),
+                                ]);
                                 foreach ($attributes as $attribute) {
                                     $components[] = Forms\Components\Fieldset::make($attribute->name)
                                         ->schema([
+                                            Forms\Components\Actions::make([
+                                                Forms\Components\Actions\Action::make('enable_all_attr_' . $attribute->id)
+                                                    ->label('Включить все')
+                                                    ->link()
+                                                    ->color('gray')
+                                                    ->action(function (callable $set, callable $get) use ($attribute, $attributeIds) {
+                                                        $set('attr_' . $attribute->id, $attribute->values->pluck('id')->toArray());
+
+                                                        // Обновляем сводный список для sync
+                                                        $ids = [];
+                                                        foreach ($attributeIds as $id) {
+                                                            $ids = array_merge($ids, array_filter((array) ($get('attr_' . $id) ?? [])));
+                                                        }
+                                                        $set('attributeValuesSync', array_values(array_unique($ids)));
+                                                    }),
+                                                Forms\Components\Actions\Action::make('clear_all_attr_' . $attribute->id)
+                                                    ->label('Очистить')
+                                                    ->link()
+                                                    ->color('gray')
+                                                    ->action(function (callable $set, callable $get) use ($attribute, $attributeIds) {
+                                                        $set('attr_' . $attribute->id, []);
+
+                                                        // Обновляем сводный список для sync
+                                                        $ids = [];
+                                                        foreach ($attributeIds as $id) {
+                                                            $ids = array_merge($ids, array_filter((array) ($get('attr_' . $id) ?? [])));
+                                                        }
+                                                        $set('attributeValuesSync', array_values(array_unique($ids)));
+                                                    }),
+                                            ]),
                                             Forms\Components\CheckboxList::make('attr_' . $attribute->id)
                                                 ->label('')
                                                 ->options($attribute->values->pluck('value', 'id')->toArray())

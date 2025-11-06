@@ -114,9 +114,48 @@ class ProductResource extends Resource
 
                                 // Строим компоненты для каждого атрибута
                                 $components = [];
+                                $attributeIds = $attributes->pluck('id')->toArray();
+
+                                // Глобальные действия: включить все / очистить все характеристики товара (как текстовые ссылки)
+                                $components[] = Forms\Components\Actions::make([
+                                    Forms\Components\Actions\Action::make('enable_all_attributes')
+                                        ->label('Включить все характеристики')
+                                        ->link()
+                                        ->color('gray')
+                                        ->action(function (callable $set) use ($attributes) {
+                                            foreach ($attributes as $attribute) {
+                                                $set('attr_' . $attribute->id, $attribute->values->pluck('id')->toArray());
+                                            }
+                                        }),
+                                    Forms\Components\Actions\Action::make('clear_all_attributes')
+                                        ->label('Очистить все характеристики')
+                                        ->link()
+                                        ->color('gray')
+                                        ->action(function (callable $set) use ($attributes) {
+                                            foreach ($attributes as $attribute) {
+                                                $set('attr_' . $attribute->id, []);
+                                            }
+                                        }),
+                                ]);
                                 foreach ($attributes as $attribute) {
                                     $components[] = Forms\Components\Fieldset::make($attribute->name)
                                         ->schema([
+                                            Forms\Components\Actions::make([
+                                                Forms\Components\Actions\Action::make('enable_all_attr_' . $attribute->id)
+                                                    ->label('Включить все')
+                                                    ->link()
+                                                    ->color('gray')
+                                                    ->action(function (callable $set) use ($attribute) {
+                                                        $set('attr_' . $attribute->id, $attribute->values->pluck('id')->toArray());
+                                                    }),
+                                                Forms\Components\Actions\Action::make('clear_all_attr_' . $attribute->id)
+                                                    ->label('Очистить')
+                                                    ->link()
+                                                    ->color('gray')
+                                                    ->action(function (callable $set) use ($attribute) {
+                                                        $set('attr_' . $attribute->id, []);
+                                                    }),
+                                            ]),
                                             Forms\Components\CheckboxList::make('attr_' . $attribute->id)
                                                 ->label('')
                                                 ->options($attribute->values->pluck('value', 'id')->toArray())
