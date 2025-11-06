@@ -71,7 +71,10 @@ class Product extends Model implements HasMedia
 
     public function attributeValues(): BelongsToMany
     {
-        return $this->belongsToMany(AttributeValue::class, 'attribute_value_product_variant', 'product_variant_id', 'attribute_value_id');
+        // Выбранные значения атрибутов у товара/варианта
+        return $this->belongsToMany(AttributeValue::class, 'attribute_value_product', 'product_id', 'attribute_value_id')
+            ->withPivot('type')
+            ->wherePivot('type', 'selected');
     }
 
     /**
@@ -79,7 +82,10 @@ class Product extends Model implements HasMedia
      */
     public function baseAttributeValues(): BelongsToMany
     {
-        return $this->belongsToMany(AttributeValue::class, 'attribute_value_product', 'product_id', 'attribute_value_id');
+        // Базовые (доступные) значения атрибутов, назначенные товару (обычно у родителя)
+        return $this->belongsToMany(AttributeValue::class, 'attribute_value_product', 'product_id', 'attribute_value_id')
+            ->withPivot('type')
+            ->wherePivot('type', 'base');
     }
 
     public function registerMediaCollections(): void

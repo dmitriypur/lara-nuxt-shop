@@ -236,13 +236,13 @@ class ProductVariantsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->after(function ($record, array $data) {
-                        $record->attributeValues()->sync($data['attributeValuesSync'] ?? []);
+                        $record->attributeValues()->syncWithPivotValues($data['attributeValuesSync'] ?? [], ['type' => 'selected']);
                     }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->after(function ($record, array $data) {
-                        $record->attributeValues()->sync($data['attributeValuesSync'] ?? []);
+                        $record->attributeValues()->syncWithPivotValues($data['attributeValuesSync'] ?? [], ['type' => 'selected']);
                     }),
                 Tables\Actions\DeleteAction::make(),
             ])

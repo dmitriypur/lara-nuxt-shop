@@ -12,7 +12,9 @@ class AttributeValue extends Model
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class);
+        // Все товары, связанные с этим значением атрибута (любой тип)
+        return $this->belongsToMany(Product::class, 'attribute_value_product', 'attribute_value_id', 'product_id')
+            ->withPivot('type');
     }
 
     public function attribute(): BelongsTo
@@ -22,7 +24,9 @@ class AttributeValue extends Model
 
     public function variants(): BelongsToMany
     {
-        // Варианты представлены моделью Product с parent_id
-        return $this->belongsToMany(Product::class, 'attribute_value_product_variant', 'attribute_value_id', 'product_variant_id');
+        // Варианты — это те же продукты, для которых назначены выбранные значения (type = 'selected')
+        return $this->belongsToMany(Product::class, 'attribute_value_product', 'attribute_value_id', 'product_id')
+            ->withPivot('type')
+            ->wherePivot('type', 'selected');
     }
 }

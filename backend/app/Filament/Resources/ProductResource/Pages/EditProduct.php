@@ -33,6 +33,6 @@ class EditProduct extends EditRecord
         }
 
         $ids = array_values(array_unique($ids));
-        $this->record->baseAttributeValues()->sync($ids);
+        $this->record->baseAttributeValues()->syncWithPivotValues($ids, ['type' => 'base']);
     }
 }
