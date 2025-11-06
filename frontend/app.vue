@@ -5,6 +5,7 @@
       <NuxtPage />
     </main>
     <AppFooter />
+    <ToastContainer />
   </div>
 </template>
 

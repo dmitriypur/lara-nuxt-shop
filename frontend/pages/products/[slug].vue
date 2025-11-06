@@ -129,7 +129,7 @@
         </div>
 
         <div class="flex items-center space-x-4 pt-4">
-          <button @click="addToCart" class="btn-primary flex-1">
+          <button @click="addToCart" :class="['btn-primary flex-1', needSelection ? 'opacity-50 cursor-not-allowed' : '']" :title="needSelection ? 'Выберите параметры товара' : ''">
             <Icon name="heroicons:shopping-cart" class="h-5 w-5 inline mr-2" />
             Добавить в корзину
           </button>
@@ -151,9 +151,11 @@
 import { ref, computed, watch, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
+import { useToastStore } from '@/stores/toast';
 
 const route = useRoute();
 const cartStore = useCartStore();
+const toast = useToastStore();
 
 // Используем единый композабл для API с базовым URL из runtimeConfig
 const { getProduct, apiCall } = useApi()
@@ -245,9 +247,12 @@ const initDefaultSelections = () => {
   const groups = attributesGroups.value || {}
   const defaults = {}
   for (const [attrName, values] of Object.entries(groups)) {
-    if (Array.isArray(values) && values.length > 0) {
+    if (!Array.isArray(values)) continue
+    // Если в группе ровно один вариант — выбираем его по умолчанию
+    if (values.length === 1) {
       defaults[attrName] = values[0]
     }
+    // Если вариантов больше одного — по умолчанию не выбираем ничего
   }
   selectedOptions.value = defaults
 }
@@ -269,7 +274,21 @@ const selectAttribute = (attrName, val) => {
   }
 }
 
+// Нужно ли выбрать параметры перед добавлением в корзину
+const needSelection = computed(() => {
+  const groups = attributesGroups.value || {}
+  return Object.entries(groups).some(([name, values]) => {
+    if (!Array.isArray(values)) return false
+    if (values.length <= 1) return false // одиночный вариант выбран по умолчанию
+    return !selectedOptions.value?.[name]
+  })
+})
+
 const addToCart = () => {
+  if (needSelection.value) {
+    toast.add('error', 'Выберите параметры товара')
+    return
+  }
   if (!currentProduct.value) return
   const p = currentProduct.value
   const payload = {
@@ -281,6 +300,6 @@ const addToCart = () => {
     options: selectedOptions.value && Object.keys(selectedOptions.value).length ? selectedOptions.value : null
   }
   cartStore.addItem(payload, 1)
-  alert('Товар добавлен в корзину!')
+  toast.add('success', 'Товар добавлен в корзину!')
 }
 </script>
