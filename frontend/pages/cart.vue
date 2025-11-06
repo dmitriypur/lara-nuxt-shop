@@ -45,7 +45,7 @@
           <div class="divide-y divide-gray-200">
             <div 
               v-for="item in cartStore.items" 
-              :key="item.id"
+              :key="item.id + ':' + JSON.stringify(item.options || {})"
               class="p-6 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4"
             >
               <!-- Изображение товара -->
@@ -69,12 +69,21 @@
                 <p class="text-gray-600 text-sm">
                   Цена за единицу: {{ formatPrice(item.price) }} ₽
                 </p>
+                <div v-if="item.options" class="mt-2 text-xs text-gray-600 flex flex-wrap gap-2">
+                  <span
+                    v-for="(opt, name) in item.options"
+                    :key="name"
+                    class="px-2 py-1 rounded border border-gray-200 bg-gray-100 text-gray-700"
+                  >
+                    {{ name }}: {{ opt?.value ?? opt }}
+                  </span>
+                </div>
               </div>
               
               <!-- Количество -->
               <div class="flex items-center space-x-3">
                 <button 
-                  @click="updateQuantity(item.id, item.quantity - 1)"
+                  @click="updateQuantity(item.id, item.quantity - 1, item.options)"
                   class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
                   :disabled="item.quantity <= 1"
                 >
@@ -84,7 +93,7 @@
                 <span class="w-12 text-center font-medium">{{ item.quantity }}</span>
                 
                 <button 
-                  @click="updateQuantity(item.id, item.quantity + 1)"
+                  @click="updateQuantity(item.id, item.quantity + 1, item.options)"
                   class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
                 >
                   <Icon name="heroicons:plus" class="h-4 w-4" />
@@ -100,7 +109,7 @@
               
               <!-- Кнопка удаления -->
               <button 
-                @click="removeItem(item.id)"
+                @click="removeItem(item.id, item.options)"
                 class="text-red-600 hover:text-red-700 p-2"
               >
                 <Icon name="heroicons:trash" class="h-5 w-5" />

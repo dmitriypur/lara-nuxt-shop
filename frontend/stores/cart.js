@@ -45,18 +45,18 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
-  const removeItem = (productId) => {
-    const index = items.value.findIndex(item => item.id === productId)
+  const removeItem = (productId, options = null) => {
+    const index = items.value.findIndex(item => item.id === productId && JSON.stringify(item.options) === JSON.stringify(options))
     if (index > -1) {
       items.value.splice(index, 1)
     }
   }
 
-  const updateQuantity = (productId, quantity) => {
-    const item = items.value.find(item => item.id === productId)
+  const updateQuantity = (productId, quantity, options = null) => {
+    const item = items.value.find(item => item.id === productId && JSON.stringify(item.options) === JSON.stringify(options))
     if (item) {
       if (quantity <= 0) {
-        removeItem(productId)
+        removeItem(productId, options)
       } else {
         item.quantity = quantity
       }

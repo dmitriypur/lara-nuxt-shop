@@ -106,18 +106,24 @@
             </NuxtLink>
           </div>
         </div>
-        <!-- Атрибуты (характеристики) товара: например, Размер -->
+        <!-- Атрибуты (характеристики) товара: выбор опций -->
         <div v-if="attributesGroups && Object.keys(attributesGroups).length" class="space-y-6">
           <div v-for="(values, attrName) in attributesGroups" :key="attrName">
             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ attrName }}</h3>
             <div class="flex flex-wrap gap-2">
-              <span
+              <button
                 v-for="val in values"
                 :key="val.id"
-                class="px-3 py-2 rounded-md border bg-white text-gray-800 border-gray-300 text-sm"
+                @click="selectAttribute(attrName, val)"
+                :class="[
+                  'px-3 py-2 rounded-md border text-sm transition-colors',
+                  isSelected(attrName, val)
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
+                ]"
               >
                 {{ val.value }}
-              </span>
+              </button>
             </div>
           </div>
         </div>
@@ -232,7 +238,36 @@ const breadcrumbs = computed(() => {
 
 const formatPrice = (price) => new Intl.NumberFormat('ru-RU').format(price);
 
-// Убрали интерактивный подбор варианта по атрибутам — фронт рендерит только display
+// Выбор опций атрибутов для корзины
+const selectedOptions = ref({})
+
+const initDefaultSelections = () => {
+  const groups = attributesGroups.value || {}
+  const defaults = {}
+  for (const [attrName, values] of Object.entries(groups)) {
+    if (Array.isArray(values) && values.length > 0) {
+      defaults[attrName] = values[0]
+    }
+  }
+  selectedOptions.value = defaults
+}
+
+watch(attributesGroups, () => {
+  // Переинициализируем выбор при смене товара/варианта
+  initDefaultSelections()
+}, { immediate: true })
+
+const isSelected = (attrName, val) => {
+  const v = selectedOptions.value?.[attrName]
+  return v && v.id === val.id
+}
+
+const selectAttribute = (attrName, val) => {
+  selectedOptions.value = {
+    ...selectedOptions.value,
+    [attrName]: val
+  }
+}
 
 const addToCart = () => {
   if (!currentProduct.value) return
@@ -242,7 +277,8 @@ const addToCart = () => {
     title: p.title,
     price: p.price,
     images: p.images,
-    options: null
+    // Передаём выбранные опции в корзину; cart store учитывает options в уникальности позиции
+    options: selectedOptions.value && Object.keys(selectedOptions.value).length ? selectedOptions.value : null
   }
   cartStore.addItem(payload, 1)
   alert('Товар добавлен в корзину!')
