@@ -65,12 +65,27 @@ class ProductController extends Controller
 
         // Если это вариант, загружаем данные родителя
         if ($product->parent_id) {
-            $product->load(['parent.media', 'parent.categories']);
+            $product->load([
+                'parent.media',
+                'parent.categories',
+                'parent.baseAttributeValues.attribute',
+            ]);
         } else {
             $product->load(['media', 'categories']);
         }
 
-        $product->load(['variants' => fn ($q) => $q->where('active', true)]);
+        // Текущие атрибуты и базовые атрибуты
+        $product->load([
+            'attributeValues.attribute',
+            'baseAttributeValues.attribute',
+        ]);
+
+        // Варианты с атрибутами/медиа/категориями
+        $product->load([
+            'variants' => fn ($q) => $q
+                ->with(['media', 'categories', 'attributeValues.attribute'])
+                ->where('active', true)
+        ]);
 
         return new ProductResource($product);
     }
@@ -97,7 +112,13 @@ class ProductController extends Controller
 
         $productToLoad = $product->parent_id ? $product->parent : $product;
 
-        $productToLoad->load(['media', 'categories', 'variants' => fn ($q) => $q->with(['media', 'categories'])->where('active', true)]);
+        $productToLoad->load([
+            'media',
+            'categories',
+            'variants' => fn ($q) => $q
+                ->with(['media', 'categories', 'attributeValues.attribute'])
+                ->where('active', true)
+        ]);
 
         $relatedProducts->push($productToLoad);
         $productToLoad->variants->each(fn ($variant) => $relatedProducts->push($variant));

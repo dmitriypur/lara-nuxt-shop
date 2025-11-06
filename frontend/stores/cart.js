@@ -18,17 +18,29 @@ export const useCartStore = defineStore('cart', () => {
 
   // Действия
   const addItem = (product, quantity = 1) => {
-    const existingItem = items.value.find(item => item.id === product.id)
-    
+    // Нормализуем входной объект товара (поддержка title/name и images)
+    const id = product.id
+    const name = product.title || product.name || 'Товар'
+    const price = Number(product.price) || 0
+    const image = product.image
+      || (product.images?.[0]?.thumb || product.images?.[0]?.url)
+      || null
+    // Если когда‑то будем передавать опции (например, { size: 'XL' }),
+    // то учитываем их при уникальности позиции.
+    const options = product.options || product.selectedOptions || null
+
+    const existingItem = items.value.find(item => item.id === id && JSON.stringify(item.options) === JSON.stringify(options))
+
     if (existingItem) {
       existingItem.quantity += quantity
     } else {
       items.value.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: quantity
+        id,
+        name,
+        price,
+        image,
+        quantity,
+        options
       })
     }
   }

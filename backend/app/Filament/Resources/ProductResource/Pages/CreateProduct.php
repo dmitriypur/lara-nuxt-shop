@@ -16,7 +16,8 @@ class CreateProduct extends CreateRecord
     protected function afterCreate(): void
     {
         // Синхронизируем значения атрибутов базового товара из чекбоксов
-        $state = $this->form->getState();
+        // ВАЖНО: используем getRawState(), чтобы получить значения полей с dehydrated(false)
+        $state = $this->form->getRawState();
         $ids = [];
         foreach ($state as $key => $value) {
             if (Str::startsWith($key, 'attr_') && is_array($value)) {

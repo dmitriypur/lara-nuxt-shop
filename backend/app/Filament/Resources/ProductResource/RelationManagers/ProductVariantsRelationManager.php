@@ -189,6 +189,18 @@ class ProductVariantsRelationManager extends RelationManager
                                                 ->options($attribute->values->pluck('value', 'id')->toArray())
                                                 ->columns(3)
                                                 ->dehydrated(false)
+                                                // На edit-форме default для dehydrated(false) не применится.
+                                                // Заполняем состояние вручную из связки варианта.
+                                                ->afterStateHydrated(function (Forms\Components\CheckboxList $component, $state) use ($record, $attribute) {
+                                                    if (!$record) {
+                                                        return;
+                                                    }
+                                                    $ids = $record->attributeValues()
+                                                        ->where('attribute_id', $attribute->id)
+                                                        ->pluck('attribute_values.id')
+                                                        ->toArray();
+                                                    $component->state($ids);
+                                                })
                                                 ->reactive()
                                                 ->afterStateUpdated(function ($state, callable $set, callable $get) use ($attributeIds) {
                                                     $ids = [];
@@ -198,15 +210,7 @@ class ProductVariantsRelationManager extends RelationManager
                                                     }
                                                     $set('attributeValuesSync', array_values(array_unique($ids)));
                                                 })
-                                                ->default(function ($record) use ($attribute) {
-                                                    if (!$record) {
-                                                        return [];
-                                                    }
-                                                    return $record->attributeValues()
-                                                        ->where('attribute_id', $attribute->id)
-                                                        ->pluck('attribute_values.id')
-                                                        ->toArray();
-                                                }),
+                                                ,
                                         ]);
                                 }
 

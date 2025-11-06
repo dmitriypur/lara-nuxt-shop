@@ -26,23 +26,23 @@
     </div>
 
     <!-- Основной контент страницы товара -->
-    <div v-if="product" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div v-if="currentProduct" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <!-- Галерея изображений -->
       <div class="space-y-4">
         <div class="relative">
           <img 
             :src="selectedImage?.url || primaryImageUrl || '/images/placeholder.jpg'"
-            :alt="product.title"
+            :alt="currentProduct.title"
             class="w-full h-96 object-cover rounded-lg shadow-lg"
           >
-          <div v-if="product.old_price && product.old_price > product.price" 
+          <div v-if="currentProduct.old_price && currentProduct.old_price > currentProduct.price" 
                class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-            -{{ Math.round(((product.old_price - product.price) / product.old_price) * 100) }}%
+            -{{ Math.round(((currentProduct.old_price - currentProduct.price) / currentProduct.old_price) * 100) }}%
           </div>
         </div>
-        <div v-if="product.images && product.images.length > 1" class="flex space-x-2 overflow-x-auto pb-2">
+        <div v-if="currentProduct.images && currentProduct.images.length > 1" class="flex space-x-2 overflow-x-auto pb-2">
           <button 
-            v-for="image in product.images" 
+            v-for="image in currentProduct.images" 
             :key="image.id"
             @click="selectedImage = image"
             :class="selectedImage?.id === image.id ? 'ring-2 ring-blue-500' : 'ring-1 ring-gray-200'"
@@ -50,7 +50,7 @@
           >
             <img 
               :src="image.thumb"
-              :alt="`${product.title} - изображение`"
+              :alt="`${currentProduct.title} - изображение`"
               class="w-full h-full object-cover"
             >
           </button>
@@ -60,26 +60,26 @@
       <!-- Информация о товаре -->
       <div class="space-y-6">
         <div>
-          <div v-if="product.categories && product.categories.length > 0" class="mb-2">
+          <div v-if="currentProduct.categories && currentProduct.categories.length > 0" class="mb-2">
             <NuxtLink 
-              :to="`/categories/${product.categories[0].slug}`"
+              :to="`/categories/${currentProduct.categories[0].slug}`"
               class="inline-block bg-blue-100 text-blue-700 text-sm px-3 py-1 rounded-full hover:bg-blue-200 transition-colors"
             >
-              {{ product.categories[0].name }}
+              {{ currentProduct.categories[0].name }}
             </NuxtLink>
           </div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ product.title }}</h1>
-          <p v-if="product.sku" class="text-sm text-gray-500">Артикул: {{ product.sku }}</p>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ currentProduct.title }}</h1>
+          <p v-if="currentProduct.sku" class="text-sm text-gray-500">Артикул: {{ currentProduct.sku }}</p>
         </div>
         
         <div class="flex items-center space-x-4">
-          <span class="text-3xl font-bold text-gray-900">{{ formatPrice(product.price) }} ₽</span>
-          <span v-if="product.old_price && product.old_price > product.price" class="text-xl text-gray-500 line-through">
-            {{ formatPrice(product.old_price) }} ₽
+          <span class="text-3xl font-bold text-gray-900">{{ formatPrice(currentProduct.price) }} ₽</span>
+          <span v-if="currentProduct.old_price && currentProduct.old_price > currentProduct.price" class="text-xl text-gray-500 line-through">
+            {{ formatPrice(currentProduct.old_price) }} ₽
           </span>
         </div>
 
-        <!-- Варианты -->
+        <!-- Варианты (ссылки), оставляем как было -->
         <div v-if="variantsToShow && variantsToShow.length > 0" class="space-y-4">
           <h3 class="text-lg font-semibold text-gray-900">Варианты</h3>
           <div class="flex flex-wrap gap-3">
@@ -87,7 +87,7 @@
               v-for="variant in variantsToShow"
               :key="variant.id"
               :to="`/products/${variant.slug}`"
-              :class="product.id === variant.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'ring-1 ring-gray-200'"
+              :class="currentProduct.id === variant.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'ring-1 ring-gray-200'"
               class="p-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2 text-decoration-none"
             >
               <template v-if="getVariantThumb(variant)">
@@ -106,6 +106,21 @@
             </NuxtLink>
           </div>
         </div>
+        <!-- Атрибуты (характеристики) товара: например, Размер -->
+        <div v-if="attributesGroups && Object.keys(attributesGroups).length" class="space-y-6">
+          <div v-for="(values, attrName) in attributesGroups" :key="attrName">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ attrName }}</h3>
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="val in values"
+                :key="val.id"
+                class="px-3 py-2 rounded-md border bg-white text-gray-800 border-gray-300 text-sm"
+              >
+                {{ val.value }}
+              </span>
+            </div>
+          </div>
+        </div>
 
         <div class="flex items-center space-x-4 pt-4">
           <button @click="addToCart" class="btn-primary flex-1">
@@ -118,16 +133,16 @@
 
     <!-- Описание и похожие товары -->
     <div class="mt-12">
-      <div v-if="product && product.description" class="prose max-w-none mb-12">
+      <div v-if="currentProduct && currentProduct.description" class="prose max-w-none mb-12">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">Описание товара</h2>
-        <div v-html="product.description"></div>
+        <div v-html="currentProduct.description"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
 
@@ -151,6 +166,10 @@ const { data: productData, pending, error, refresh } = await useLazyAsyncData(
 // Приводим к удобному виду
 const product = computed(() => productData.value?.data || null)
 
+// Текущий выбранный вариант/товар
+const selectedVariant = ref(null)
+const currentProduct = computed(() => selectedVariant.value || product.value)
+
 // Группа связанных товаров (родитель + его варианты) из backend-эндпоинта
 const { data: relatedData } = await useLazyAsyncData(
   `related-products-${route.params.slug}`,
@@ -163,19 +182,31 @@ const { data: relatedData } = await useLazyAsyncData(
   { server: false, watch: [product, () => route.params.slug] }
 )
 
+// Варианты/опции товара (родитель + его активные варианты)
+const productOptions = computed(() => relatedData.value?.data || [])
+
+// Список вариантов для отображения (без текущего товара)
 const variantsToShow = computed(() => {
-  const currentId = product.value?.id
-  const group = relatedData.value?.data || []
-  return group.filter((v) => v.id !== currentId)
+  const group = productOptions.value || []
+  const currentId = currentProduct.value?.id
+  return group.filter(v => v.id !== currentId)
 })
+
+// Группы атрибутов базового товара (варианты выбора)
+// Упрощаем: бекенд даёт attributes.display (selected-группы, либо base-группы как фолбэк)
+const attributesGroups = computed(() => currentProduct.value?.attributes?.display || {})
+
+// Выбранные значения атрибутов
+const selectedAttributes = reactive({})
 
 const getVariantThumb = (v) => v?.images?.[0]?.thumb || v?.images?.[0]?.url || null
 
 const selectedImage = ref(null);
 
 // Инициализация и обновление выбранного изображения
+// Следим за текущим продуктом (с учетом выбранного варианта) и обновляем выбранное изображение
 watch(
-  product,
+  currentProduct,
   (newProduct) => {
     if (newProduct?.images?.[0]) {
       selectedImage.value = newProduct.images[0];
@@ -186,33 +217,56 @@ watch(
   { immediate: true }
 );
 
-const primaryImageUrl = computed(() => product.value?.images?.[0]?.url || null);
+const primaryImageUrl = computed(() => currentProduct.value?.images?.[0]?.url || null);
 
 const breadcrumbs = computed(() => {
-  if (!product.value) return [];
+  if (!currentProduct.value) return [];
   const crumbs = [{ name: 'Каталог', path: '/products' }];
-  if (product.value.categories?.[0]) {
+  if (currentProduct.value.categories?.[0]) {
     crumbs.push({ 
-      name: product.value.categories[0].name, 
-      path: `/categories/${product.value.categories[0].slug}` 
+      name: currentProduct.value.categories[0].name, 
+      path: `/categories/${currentProduct.value.categories[0].slug}` 
     });
   }
-  crumbs.push({ name: product.value.title, path: '' });
+  crumbs.push({ name: currentProduct.value.title, path: '' });
   return crumbs;
 });
 
 const formatPrice = (price) => new Intl.NumberFormat('ru-RU').format(price);
 
+const selectAttribute = (attrName, val) => {
+  selectedAttributes[attrName] = val
+  // Пытаемся найти вариант, соответствующий выбранным атрибутам
+  const match = findMatchingVariant()
+  selectedVariant.value = match || null
+}
+
+const findMatchingVariant = () => {
+  const variants = productOptions.value.filter(v => v.parent_id) // только реальные варианты
+  const selectedPairs = Object.entries(selectedAttributes) // [ [attrName, valObj], ... ]
+
+  if (selectedPairs.length === 0) return null
+
+  return variants.find(v => {
+    const attrs = v.attributes?.selected || []
+    // Проверяем, что у варианта есть все выбранные атрибуты с нужными значениями
+    return selectedPairs.every(([attrName, val]) => {
+      return attrs.some(a => a.attribute === attrName && a.id === val.id)
+    })
+  }) || null
+}
+
 const addToCart = () => {
-  if (product.value) {
-    cartStore.addItem({
-      id: product.value.id,
-      title: product.value.title,
-      price: product.value.price,
-      image: primaryImageUrl.value,
-      quantity: 1,
-    });
-    alert('Товар добавлен в корзину!');
+  if (!currentProduct.value) return
+  const p = currentProduct.value
+  const payload = {
+    id: p.id,
+    title: p.title,
+    price: p.price,
+    images: p.images,
+    options: Object.keys(selectedAttributes).length ? selectedAttributes : null
   }
-};
+  cartStore.addItem(payload, 1)
+  alert('Товар добавлен в корзину!')
+}
 </script>

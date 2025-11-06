@@ -161,14 +161,17 @@ class ProductResource extends Resource
                                                 ->options($attribute->values->pluck('value', 'id')->toArray())
                                                 ->columns(3)
                                                 ->dehydrated(false)
-                                                ->default(function ($record) use ($attribute) {
+                                                // Важно: для формы редактирования hydrate не происходит из модели,
+                                                // так как поле dehydrated(false). Заполняем состояние вручную.
+                                                ->afterStateHydrated(function (Forms\Components\CheckboxList $component, $state) use ($record, $attribute) {
                                                     if (!$record) {
-                                                        return [];
+                                                        return;
                                                     }
-                                                    return $record->baseAttributeValues()
+                                                    $ids = $record->baseAttributeValues()
                                                         ->where('attribute_id', $attribute->id)
                                                         ->pluck('attribute_values.id')
                                                         ->toArray();
+                                                    $component->state($ids);
                                                 }),
                                         ]);
                                 }
