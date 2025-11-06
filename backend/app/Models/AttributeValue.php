@@ -21,12 +21,4 @@ class AttributeValue extends Model
     {
         return $this->belongsTo(Attribute::class);
     }
-
-    public function variants(): BelongsToMany
-    {
-        // Варианты — это те же продукты, для которых назначены выбранные значения (type = 'selected')
-        return $this->belongsToMany(Product::class, 'attribute_value_product', 'attribute_value_id', 'product_id')
-            ->withPivot('type')
-            ->wherePivot('type', 'selected');
-    }
 }

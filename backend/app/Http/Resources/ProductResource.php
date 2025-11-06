@@ -23,25 +23,7 @@ class ProductResource extends JsonResource
             $categories = $this->parent->categories;
         }
 
-        // Базовые атрибуты (варианты выбора) берём у родителя, если это вариант.
-        // ВАЖНО: раньше мы брали пустые baseAttributeValues варианта, из-за чего на фронте группы были пустыми.
-        // Предпочитаем родителя, если он есть, иначе — текущий товар.
-        $baseAttributeValues = collect();
-        if ($this->parent_id && $this->relationLoaded('parent') && $this->parent->relationLoaded('baseAttributeValues')) {
-            $baseAttributeValues = $this->parent->baseAttributeValues;
-        } elseif ($this->relationLoaded('baseAttributeValues')) {
-            $baseAttributeValues = $this->baseAttributeValues;
-        }
-
-        // Оставляем ключами названия атрибутов (без values()), чтобы фронт получил объект { "Размер": [...] }
-        $baseAttributes = $baseAttributeValues
-            ->groupBy(fn ($v) => optional($v->attribute)->name)
-            ->map(fn ($group) => $group->map(fn ($v) => [
-                'id' => $v->id,
-                'slug' => $v->slug,
-                'value' => $v->value,
-            ])->values())
-            ->filter();
+        // Базовые атрибуты для фронта больше не возвращаем: фронт всегда читает selected.
 
         // Атрибуты, выбранные у текущего товара/варианта
         $selectedAttributes = collect();
@@ -54,8 +36,7 @@ class ProductResource extends JsonResource
             ]);
         }
 
-        // Унифицированное представление для отображения на фронте:
-        // если есть выбранные у текущего товара/варианта — покажем их, иначе базовые группы
+        // Унифицированное представление для отображения на фронте: всегда selected-группы
         $selectedGrouped = $selectedAttributes
             ->groupBy('attribute')
             ->map(fn ($group) => $group->map(fn ($v) => [
@@ -64,7 +45,7 @@ class ProductResource extends JsonResource
                 'value' => $v['value'],
             ])->values())
             ->filter();
-        $displayAttributes = $selectedAttributes->isNotEmpty() ? $selectedGrouped : $baseAttributes;
+        $displayAttributes = $selectedGrouped;
 
         return [
             'id' => $this->id,
@@ -80,8 +61,6 @@ class ProductResource extends JsonResource
             'categories' => CategoryResource::collection($categories),
             'variants' => ProductResource::collection($this->whenLoaded('variants')),
             'attributes' => [
-                'base' => $baseAttributes,
-                'selected' => $selectedAttributes,
                 'display' => $displayAttributes,
             ],
             'images' => $media->map(function ($image) {

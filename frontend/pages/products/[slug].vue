@@ -196,8 +196,6 @@ const variantsToShow = computed(() => {
 // Упрощаем: бекенд даёт attributes.display (selected-группы, либо base-группы как фолбэк)
 const attributesGroups = computed(() => currentProduct.value?.attributes?.display || {})
 
-// Выбранные значения атрибутов
-const selectedAttributes = reactive({})
 
 const getVariantThumb = (v) => v?.images?.[0]?.thumb || v?.images?.[0]?.url || null
 
@@ -234,27 +232,7 @@ const breadcrumbs = computed(() => {
 
 const formatPrice = (price) => new Intl.NumberFormat('ru-RU').format(price);
 
-const selectAttribute = (attrName, val) => {
-  selectedAttributes[attrName] = val
-  // Пытаемся найти вариант, соответствующий выбранным атрибутам
-  const match = findMatchingVariant()
-  selectedVariant.value = match || null
-}
-
-const findMatchingVariant = () => {
-  const variants = productOptions.value.filter(v => v.parent_id) // только реальные варианты
-  const selectedPairs = Object.entries(selectedAttributes) // [ [attrName, valObj], ... ]
-
-  if (selectedPairs.length === 0) return null
-
-  return variants.find(v => {
-    const attrs = v.attributes?.selected || []
-    // Проверяем, что у варианта есть все выбранные атрибуты с нужными значениями
-    return selectedPairs.every(([attrName, val]) => {
-      return attrs.some(a => a.attribute === attrName && a.id === val.id)
-    })
-  }) || null
-}
+// Убрали интерактивный подбор варианта по атрибутам — фронт рендерит только display
 
 const addToCart = () => {
   if (!currentProduct.value) return
@@ -264,7 +242,7 @@ const addToCart = () => {
     title: p.title,
     price: p.price,
     images: p.images,
-    options: Object.keys(selectedAttributes).length ? selectedAttributes : null
+    options: null
   }
   cartStore.addItem(payload, 1)
   alert('Товар добавлен в корзину!')
