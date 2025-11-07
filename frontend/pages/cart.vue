@@ -239,6 +239,8 @@
 
 <script setup>
 const cartStore = useCartStore()
+import { useToastStore } from '@/stores/toast'
+const toastStore = useToastStore()
 const { getProducts } = useApi()
 
 // SEO
@@ -298,9 +300,12 @@ const removeItem = (productId) => {
 }
 
 const clearCart = () => {
-  if (confirm('Вы уверены, что хотите очистить корзину?')) {
-    cartStore.clearCart()
+  if (cartStore.isEmpty) {
+    toastStore.add('info', 'Корзина уже пуста')
+    return
   }
+  cartStore.clearCart()
+  toastStore.add('success', 'Корзина очищена')
 }
 
 const applyPromoCode = async () => {

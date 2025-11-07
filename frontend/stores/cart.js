@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
+import { useToastStore } from './toast'
 
 export const useCartStore = defineStore('cart', () => {
   // Состояние
   const items = ref([])
   const isOpen = ref(false)
+  const toast = useToastStore()
 
   // Геттеры
   const itemsCount = computed(() => {
@@ -42,6 +44,12 @@ export const useCartStore = defineStore('cart', () => {
         quantity,
         options
       })
+    }
+
+    // Тост об успешном добавлении
+    if (process.client) {
+      const qtyLabel = quantity > 1 ? ` (×${quantity})` : ''
+      toast.add('success', `Товар «${name}» добавлен в корзину${qtyLabel}`)
     }
   }
 

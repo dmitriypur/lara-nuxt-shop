@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed bottom-4 right-4 z-50 space-y-2">
+  <div class="fixed top-4 right-4 z-50 space-y-2">
     <transition-group name="toast-fade" tag="div">
       <div
         v-for="t in toastStore.toasts"
@@ -41,6 +41,6 @@ const toastClass = (type) => {
 }
 .toast-fade-enter-from, .toast-fade-leave-to {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(-8px);
 }
 </style>

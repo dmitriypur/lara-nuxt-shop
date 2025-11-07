@@ -1,18 +1,6 @@
 {
-  // https://nuxt.com/docs/guide/concepts/typescript
-  "files": [],
-  "references": [
-    {
-      "path": "./.nuxt/tsconfig.app.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.server.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.shared.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.node.json"
-    }
-  ]
+  // Minimal and compatible with current Nuxt output
+  // Nuxt generates .nuxt/tsconfig.json and .nuxt/tsconfig.server.json
+  // Use extends instead of broken references to non-existent files
+  "extends": "./.nuxt/tsconfig.json"
 }

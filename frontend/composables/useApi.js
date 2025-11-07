@@ -62,7 +62,7 @@ export const useApi = () => {
   const searchProducts = (searchTerm, params = {}) => {
     const searchParams = { search: searchTerm, ...params }
     const query = new URLSearchParams(searchParams).toString()
-    return apiCall(`/v1/search?${query}`)
+    return apiCall(`/v1/products/search?${query}`)
   }
 
   // Методы для работы с заказами

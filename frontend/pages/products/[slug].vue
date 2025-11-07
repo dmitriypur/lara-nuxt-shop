@@ -300,6 +300,6 @@ const addToCart = () => {
     options: selectedOptions.value && Object.keys(selectedOptions.value).length ? selectedOptions.value : null
   }
   cartStore.addItem(payload, 1)
-  toast.add('success', 'Товар добавлен в корзину!')
+  // Успешный тост показывается централизованно внутри cartStore.addItem
 }
 </script>

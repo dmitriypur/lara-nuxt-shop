@@ -1,0 +1,159 @@
+
+> dev
+> nuxt dev
+
+[nuxi] Nuxt 3.17.7 with Nitro 2.12.4
+[get-port] Unable to find an available port (tried 3000 on host "localhost"). Using alternative port 3001.
+
+  ➜ Local:    http://localhost:3001/
+  ➜ Network:  use --host to expose
+
+[nuxt:tailwindcss] ℹ Using default Tailwind CSS file
+  ➜ DevTools: press Shift + Option + D in the browser (v2.6.2)
+
+✔ Vite client built in 25ms
+✔ Vite server built in 196ms
+[nitro] ✔ Nuxt Nitro server built in 448ms
+ℹ Vite client warmed up in 12ms
+ℹ hmr update /pages/cart.vue?macro=true, /@id/virtual:nuxt:%2FApplications%2FMAMP%2Fhtdocs%2Fnuxt-shop%2Ffrontend%2F.nuxt%2Froutes.mjs
+
+ WARN  'manifest-route-rule' middleware already exists at '/Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/nuxt/dist/app/middleware/manifest-route-rule.js'. You can set override: true to replace it.
+
+ℹ hmr update /components/AppHeader.vue, /node_modules/tailwindcss/tailwind.css, /assets/css/main.css
+ℹ hmr update /pages/products/[slug].vue?macro=true, /@id/virtual:nuxt:%2FApplications%2FMAMP%2Fhtdocs%2Fnuxt-shop%2Ffrontend%2F.nuxt%2Froutes.mjs
+ℹ hmr update /pages/products/[slug].vue?macro=true, /@id/virtual:nuxt:%2FApplications%2FMAMP%2Fhtdocs%2Fnuxt-shop%2Ffrontend%2F.nuxt%2Froutes.mjs (x2)
+ℹ hmr update /components/ToastContainer.vue, /node_modules/tailwindcss/tailwind.css, /assets/css/main.css, /components/ToastContainer.vue?vue&type=style&index=0&lang.css
+ℹ page reload virtual:nuxt:%2FApplications%2FMAMP%2Fhtdocs%2Fnuxt-shop%2Ffrontend%2F.nuxt%2Fplugins.client.mjs
+ℹ hmr update /components/AppHeader.vue, /node_modules/tailwindcss/tailwind.css, /assets/css/main.css
+ℹ .nuxt/dist directory has been removed. Restarting Nuxt...
+[nuxt:tailwindcss] ℹ Using default Tailwind CSS file
+  ➜ DevTools: press Shift + Option + D in the browser (v2.6.2)
+
+✔ Vite client built in 17ms
+✔ Vite server built in 577ms
+
+ ERROR  Pre-transform error: parsing /Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json failed: Error: ENOENT: no such file or directory, open '/Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts
+
+[nitro] ✔ Nuxt Nitro server built in 502ms
+ℹ Vite client warmed up in 68ms
+ℹ .nuxt/dist directory has been removed. Restarting Nuxt...
+[nuxt:tailwindcss] ℹ Using default Tailwind CSS file
+  ➜ DevTools: press Shift + Option + D in the browser (v2.6.2)
+
+✔ Vite client built in 10ms
+✔ Vite server built in 508ms
+
+ ERROR  Pre-transform error: parsing /Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json failed: Error: ENOENT: no such file or directory, open '/Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts (x2)
+
+[nitro] ✔ Nuxt Nitro server built in 411ms
+ℹ Vite client warmed up in 31ms
+ℹ changed tsconfig file detected: /Applications/MAMP/htdocs/nuxt-shop/frontend/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+ℹ .nuxt/dist directory has been removed. Restarting Nuxt...
+[nuxt:tailwindcss] ℹ Using default Tailwind CSS file
+  ➜ DevTools: press Shift + Option + D in the browser (v2.6.2)
+
+✔ Vite client built in 14ms
+✔ Vite server built in 620ms
+[nitro] ✔ Nuxt Nitro server built in 604ms
+ℹ Vite client warmed up in 38ms
+tdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts
+      at file:///Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:8591:10 (x2)
+
+
+ ERROR  Pre-transform error: parsing /Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json failed: Error: ENOENT: no such file or directory, open '/Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts
+
+
+ ERROR  Internal server error: parsing /Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json failed: Error: ENOENT: no such file or directory, open '/Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts
+      at file:///Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:8591:10
+
+ℹ .nuxt/dist directory has been removed. Restarting Nuxt...
+[nuxt:tailwindcss] ℹ Using default Tailwind CSS file
+  ➜ DevTools: press Shift + Option + D in the browser (v2.6.2)
+
+✔ Vite client built in 25ms
+✔ Vite server built in 609ms
+
+ ERROR  Pre-transform error: parsing /Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json failed: Error: ENOENT: no such file or directory, open '/Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts
+
+[nitro] ✔ Nuxt Nitro server built in 542ms
+ℹ Vite client warmed up in 33ms
+
+ ERROR  Internal server error: parsing /Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json failed: Error: ENOENT: no such file or directory, open '/Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts
+      at file:///Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:8591:10
+
+
+ ERROR  Internal server error: parsing /Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json failed: Error: ENOENT: no such file or directory, open '/Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts
+      at file:///Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:8591:10 (x2)
+
+
+ ERROR  Internal server error: parsing /Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json failed: Error: ENOENT: no such file or directory, open '/Applications/MAMP/htdocs/nuxt-shop/frontend/.nuxt/tsconfig.app.json'
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts
+      at file:///Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:8591:10 (x3)
+
+ℹ changed tsconfig file detected: /Applications/MAMP/htdocs/nuxt-shop/frontend/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+
+ ERROR  Pre-transform error: Transform failed with 1 error:
+/Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts:9:7: ERROR: Multiple exports with the same name "default"
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts:9:7
+  
+  Multiple exports with the same name "default"
+  7  |  import { useCartStore } from '@/stores/cart'
+  8  |  
+  9  |  export default defineNuxtPlugin(() => {
+     |         ^
+  10 |    // Инициализация корзины из localStorage на клиенте
+  11 |    const cart = useCartStore()
+  
+
+
+ ERROR  Internal server error: Transform failed with 1 error:
+/Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts:9:7: ERROR: Multiple exports with the same name "default"
+  Plugin: vite:esbuild
+  File: /Applications/MAMP/htdocs/nuxt-shop/frontend/plugins/cart-init.client.ts:9:7
+  
+  Multiple exports with the same name "default"
+  7  |  import { useCartStore } from '@/stores/cart'
+  8  |  
+  9  |  export default defineNuxtPlugin(() => {
+     |         ^
+  10 |    // Инициализация корзины из localStorage на клиенте
+  11 |    const cart = useCartStore()
+  
+      at failureErrorWithLog (/Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/esbuild/lib/main.js:1467:15)
+      at /Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/esbuild/lib/main.js:736:50
+      at responseCallbacks.<computed> (/Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/esbuild/lib/main.js:603:9)
+      at handleIncomingPacket (/Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/esbuild/lib/main.js:658:12)
+      at Socket.readFromStdout (/Applications/MAMP/htdocs/nuxt-shop/frontend/node_modules/esbuild/lib/main.js:581:7)
+      at Socket.emit (node:events:519:28)
+      at addChunk (node:internal/streams/readable:559:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:510:3)
+      at Readable.push (node:internal/streams/readable:390:5)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:191:23)
+      at Pipe.callbackTrampoline (node:internal/async_hooks:130:17)
+
+ℹ .nuxt/dist directory has been removed. Restarting Nuxt...
+[nuxt:tailwindcss] ℹ Using default Tailwind CSS file
+  ➜ DevTools: press Shift + Option + D in the browser (v2.6.2)
+
+✔ Vite client built in 25ms
+✔ Vite server built in 596ms
+[nitro] ✔ Nuxt Nitro server built in 631ms
+ℹ Vite client warmed up in 59ms
